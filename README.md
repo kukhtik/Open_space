@@ -146,18 +146,86 @@ Live run: **161 headless tests green**, then an ASCII board snapshot (positions,
 
 ---
 
+## Hermes Viz — telemetry console for an agent farm
+
+**Problem.** A multi-agent farm (21 agents, 9 models, async task board) is opaque at a glance: which agent is doing what, where a task is stuck, what the knowledge base actually serves.
+
+**Approach.** One screen with three facets over **live data**: **OPS** — radial deck of the live team (status, model, current tool, activity); **PIPELINE** — task board with dependencies, runs and blocked states; **KNOWLEDGE** — repository graph (2,292 nodes, 839 edges) with retrieval flow.
+
+<table>
+<tr>
+<td width="50%"><img src="screenshots/hermes-viz-ops.png" alt="OPS"><br><sub>OPS — the live team as a sensor deck</sub></td>
+<td width="50%"><img src="screenshots/hermes-viz-knowledge.png" alt="KNOWLEDGE"><br><sub>KNOWLEDGE — repository graph, 2,292 nodes</sub></td>
+</tr>
+<tr>
+<td colspan="2"><img src="screenshots/hermes-viz-pipeline.png" alt="PIPELINE"><br><sub>PIPELINE — task board with runs and blocked states</sub></td>
+</tr>
+</table>
+
+**Stack:** JavaScript (canvas console) · WebSocket event feed · SQLite (kanban DB) · semantic graph with import + embedding edges.
+
+---
+
+## Codebot — Telegram bridge to a coding-agent runtime
+
+**Problem.** Coding agents run on a workstation, but steering them from a phone should not require opening a laptop.
+
+**Approach.** A dependency-free Java 21 Telegram bot (63 classes, ~10.9k LOC, plain `javac` — no Maven/Gradle) bridging to a local coding-agent server over JSON-RPC/WebSocket: live turn states, approvals, session switch/import/archive, attachments, urgent steering; shared mode where each Telegram user pairs their own machine.
+
+![Codebot — headless build + self-test](screenshots/codebot-build.png)
+
+Reference run: **63 sources compile with plain `javac` (0 errors)** and the built-in headless self-test passes.
+
+**Stack:** Java 21 (no build system) · Telegram Bot API (long polling + webhook) · JSON-RPC over WebSocket · Docker Compose + Playwright sidecar for browser tools. *(Source is local-only; the architecture is documented here.)*
+
+---
+
+## Storybeam — AI video pipeline (active fork)
+
+**What it is.** An active fork of [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) rebuilt into a platform: React front-end over the REST API, long-form mode, cost governance, policy compliance.
+
+**What we changed** (56 commits, +14,955 / −6,559 lines across 108 files):
+
+| Area | Change |
+|---|---|
+| **Long-form** | duration-driven chunked script; per-scene resume/idempotency; scene-count cap |
+| **Cost governance** | dosed image-to-video (hook + chapter beats) + per-task spend cap (`LongFormCostGovernor`) |
+| **Compliance** | AI-synthetic-content disclosure on upload; anti-misleading metadata guardrails; per-video structural variation (anti-templated output) |
+| **Product surface** | full React Create / Library / Settings UI with an API-key gate; full-parity Telegram bot (deny-by-default multiuser) |
+| **Security** | API auth on by default, bind 127.0.0.1, path-traversal fix, secret redaction in logs |
+
+![Storybeam — Create screen](screenshots/storybeam-create.png)
+
+**Stack:** Python / FastAPI · React 18 + TypeScript + Vite + Tailwind · Redis task state · ffmpeg · Docker.
+
+---
+
+## Trading research station — systematic strategy validation
+
+**Problem.** Most "profitable" retail strategies die after fees and slippage; the standard backtest hides exactly that.
+
+**Approach.** A research bench rather than a signal bot: walk-forward backtests with fees, slippage and funding; explicit look-ahead-bias checks (signals shifted one bar); CPCV (combinatorial purged CV) consistency; risk controls (position sizing, circuit breaker, kill-switch). Paper mode runs without keys.
+
+**Measured sweep** — 33 strategies across 4 timeframes: only a handful stay above PF > 1.1 with p < 0.10 and ≥ 30 trades. E.g. one 4h strategy: **PF 1.44, 2,526 trades, CPCV consistency 82%**. Same-year comparison: breakout +6.4% vs buy & hold **−52.7%** — active risk management protected the capital of a micro-account.
+
+![Trading research — validation web UI](screenshots/trading-validation.png)
+
+**Stack:** Python · CCXT · pandas / Parquet · FastAPI + Jinja2 web UI · systemd units. *(Research bench — evaluation only, not signals.)*
+
+---
+
 ## Stack
 
 | Area | Technologies |
 |---|---|
-| **Languages** | Python (primary), JavaScript / TypeScript, GDScript, SQL, Java / Kotlin, Rust (basic) |
+| **Languages** | Python (primary), JavaScript / TypeScript, Java 21, GDScript, SQL, Kotlin, Rust (basic) |
 | **AI / LLM** | llama.cpp / GGUF, ONNX Runtime, LanceDB, embeddings + cross-encoder reranking, agent harnesses (Hermes Agent, Claude Code, Codex) |
 | **3D / Game** | Godot 4 (headless-testable deterministic engines), VRM 1.0 / glTF, trimesh, Blender toolchain |
-| **Backend** | FastAPI, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
-| **Interfaces** | PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
-| **Numerical** | NumPy / SciPy, Helmert / SVD, Levenberg–Marquardt, Nelder–Mead |
+| **Backend** | FastAPI, Redis, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
+| **Frontend** | React 18 + TypeScript (Vite, Tailwind), vanilla JS canvas, PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
+| **Numerical** | NumPy / SciPy, Helmert / SVD, Levenberg–Marquardt, Nelder–Mead, walk-forward / CPCV backtesting |
 | **Infrastructure** | Docker, Linux / WSL, Git, GitHub Actions / GitLab CI, Cloudflare, systemd |
-| **Quality** | pytest, coverage gates, mutation testing, SHA-256 tamper checks, JSONL trajectories |
+| **Quality** | pytest, coverage gates, mutation testing, SHA-256 tamper checks, look-ahead-bias checks, JSONL trajectories |
 
 ---
 

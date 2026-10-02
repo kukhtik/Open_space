@@ -146,18 +146,86 @@
 
 ---
 
+## Hermes Viz — телеметрическая консоль агентной фермы
+
+**Проблема.** Мультиагентная ферма (21 агент, 9 моделей, асинхронная доска задач) непрозрачна с одного взгляда: кто что делает, где задача встала, что реально отдаёт база знаний.
+
+**Подход.** Один экран с тремя фасетами поверх **живых данных**: **OPS** — радиальный «ролодекс» живой команды (статус, модель, текущий инструмент, активность); **PIPELINE** — доска задач с зависимостями, прогонами и блокировками; **KNOWLEDGE** — граф репозитория (2 292 узла, 839 рёбер) с потоком ретривала.
+
+<table>
+<tr>
+<td width="50%"><img src="screenshots/hermes-viz-ops.png" alt="OPS"><br><sub>OPS — живая команда как сенсор-ролодекс</sub></td>
+<td width="50%"><img src="screenshots/hermes-viz-knowledge.png" alt="KNOWLEDGE"><br><sub>KNOWLEDGE — граф репозитория, 2 292 узла</sub></td>
+</tr>
+<tr>
+<td colspan="2"><img src="screenshots/hermes-viz-pipeline.png" alt="PIPELINE"><br><sub>PIPELINE — доска задач с прогонами и блокировками</sub></td>
+</tr>
+</table>
+
+**Стек:** JavaScript (canvas-консоль) · WebSocket-поток событий · SQLite (канбан-БД) · семантический граф с рёбрами импортов и эмбеддингов.
+
+---
+
+## Codebot — Telegram-мост к кодинг-агенту
+
+**Проблема.** Кодинг-агент работает на станции, но управлять им с телефона не должно требовать ноутбука.
+
+**Подход.** Telegram-бот на Java 21 без зависимостей (63 класса, ~10,9k строк, обычный `javac` — без Maven/Gradle): мост к локальному серверу кодинг-агента по JSON-RPC/WebSocket — живые состояния хода, аппрувы, переключение/импорт/архив сессий, вложения, срочный steering; режим, где каждый пользователь подключает свою машину.
+
+![Codebot — headless-сборка + self-test](screenshots/codebot-build.png)
+
+Референсный прогон: **63 исходника компилируются обычным `javac` (0 ошибок)**, встроенный headless self-test проходит.
+
+**Стек:** Java 21 (без build-системы) · Telegram Bot API (long polling + webhook) · JSON-RPC поверх WebSocket · Docker Compose + Playwright-sidecar для браузерных инструментов. *(Исходники локальные; здесь описана архитектура.)*
+
+---
+
+## Storybeam — пайплайн AI-видео (активный форк)
+
+**Что это.** Активный форк [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo), перестроенный в платформу: React-фронтенд поверх REST API, длинные форматы, контроль затрат, комплаенс.
+
+**Что изменили** (56 коммитов, +14 955 / −6 559 строк в 108 файлах):
+
+| Область | Изменение |
+|---|---|
+| **Длинные форматы** | сценарий чанками по длительности; resume/idempotency по сценам; ограничение числа сцен |
+| **Контроль затрат** | дозированный image-to-video (хук + главы) + лимит расходов на задачу (`LongFormCostGovernor`) |
+| **Комплаенс** | раскрытие AI-синтетики при загрузке; защита от вводящих метаданных; структурное варьирование (анти-шаблонность) |
+| **Продукт** | полный React UI Create / Library / Settings с API-key gate; Telegram-бот полного паритета (deny-by-default multiuser) |
+| **Безопасность** | API-авторизация включена по умолчанию, bind 127.0.0.1, фикс path traversal, редакция секретов в логах |
+
+![Storybeam — экран Create](screenshots/storybeam-create.png)
+
+**Стек:** Python / FastAPI · React 18 + TypeScript + Vite + Tailwind · Redis (состояние задач) · ffmpeg · Docker.
+
+---
+
+## Торговый исследовательский стенд — систематическая валидация стратегий
+
+**Проблема.** Большинство «прибыльных» розничных стратегий умирают после комиссий и слиппеджа; обычный бэктест это как раз и скрывает.
+
+**Подход.** Исследовательский стенд, а не сигнальный бот: walk-forward бэктесты с комиссиями, слиппеджем и фандингом; явные проверки look-ahead bias (сдвиг сигналов на бар); CPCV-консистентность (combinatorial purged CV); риск-контроль (сайзинг, circuit breaker, kill-switch). Paper-режим работает без ключей.
+
+**Измеренный свип** — 33 стратегии на 4 таймфреймах: выше порога PF > 1.1, p < 0.10 и ≥ 30 сделок остаются единицы. Пример на 4h: **PF 1.44, 2 526 сделок, CPCV-консистентность 82%**. Сравнение за тот же год: breakout +6.4% против buy & hold **−52.7%** — активное управление защитило капитал микросчёта.
+
+![Торговый стенд — web UI валидации](screenshots/trading-validation.png)
+
+**Стек:** Python · CCXT · pandas / Parquet · FastAPI + Jinja2 web UI · systemd-юниты. *(Исследовательский стенд — только оценка, не сигналы.)*
+
+---
+
 ## Стек
 
 | Область | Технологии |
 |---|---|
-| **Языки** | Python (основной), JavaScript / TypeScript, GDScript, SQL, Java / Kotlin, Rust (базово) |
+| **Языки** | Python (основной), JavaScript / TypeScript, Java 21, GDScript, SQL, Kotlin, Rust (базово) |
 | **AI / LLM** | llama.cpp / GGUF, ONNX Runtime, LanceDB, эмбеддинги + cross-encoder реранкинг, агентные контуры (Hermes Agent, Claude Code, Codex) |
 | **3D / игры** | Godot 4 (headless-тестируемые детерминированные движки), VRM 1.0 / glTF, trimesh, Blender-тулчейн |
-| **Backend** | FastAPI, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
-| **Интерфейсы** | PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
-| **Численные методы** | NumPy / SciPy, Helmert / SVD, Левенберг–Марквардт, Нелдер–Мид |
+| **Backend** | FastAPI, Redis, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
+| **Фронтенд** | React 18 + TypeScript (Vite, Tailwind), canvas-визуализации на JS, PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
+| **Численные методы** | NumPy / SciPy, Helmert / SVD, Левенберг–Марквардт, Нелдер–Мид, walk-forward / CPCV бэктестинг |
 | **Инфраструктура** | Docker, Linux / WSL, Git, GitHub Actions / GitLab CI, Cloudflare, systemd |
-| **Качество** | pytest, coverage-gates, mutation testing, SHA-256 tamper-checks, JSONL-траектории |
+| **Качество** | pytest, coverage-gates, mutation testing, SHA-256 tamper-checks, проверки look-ahead bias, JSONL-траектории |
 
 ---
 
