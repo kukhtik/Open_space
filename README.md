@@ -87,7 +87,7 @@ Reference points → **Helmert 3D (SVD)** → **Levenberg–Marquardt** → **Ne
 
 **Problem.** A surveyor draws a field abris (a hand sketch with numbered points) and then spends hours transferring it into CAD.
 
-**Approach.** Photo of the sketch → marker and text recognition → topographic DXF/DWG. **4 hours of manual drafting → 15 minutes.** In production use with three surveying companies (Belarus).
+**Approach.** Photo of the sketch → marker and text recognition → topographic DXF/DWG. **4 hours of manual drafting → 15 minutes.** In production use with surveying companies (Belarus).
 
 ![VETKA_DWG — block library audit](screenshots/vetka-dwg-library.png)
 
@@ -118,12 +118,41 @@ The screenshot shows the block-library audit console: **444 / 444 blocks pass al
 
 ---
 
+## VTuber Rigger — AI auto-rigging: model or screenshots → VRM 1.0
+
+**Problem.** Rigging a VTuber avatar — skeleton, skin weights, expressions, spring bones — takes hours of manual work in Blender, and screenshot-based reconstruction from a flat image is harder still.
+
+**Approach.** Two paths, fully local (no paid APIs): **Path A** — a 3D model (GLB/GLTF/VRM/OBJ) → VRM 1.0; **Path B** — front/side/back screenshots → VRM 1.0. K-Means + curvature body segmentation, a 53-bone VRM skeleton predictor, RBF + Laplacian skin weights, 17 expressions, springs for hair/clothing, plus headless-VRM and LPIPS/CLIP perceptual QA gates.
+
+![VTuber Rigger — pipeline run](screenshots/rigger-pipeline.png)
+
+Reference run on a test mesh: `GLB → VRM`, exit 0, **54 nodes, 1 mesh, extensions `VRMC_vrm` + `VRMC_springBone`**.
+
+**Stack:** Python · trimesh · pygltflib · numpy / scipy / scikit-learn · OpenCV · pytest (unit + integration + property + perceptual suites). Public: [github.com/kukhtik/RIGGER](https://github.com/kukhtik/RIGGER).
+
+---
+
+## Neuro Property Trade — deterministic board-game engine + AI seats
+
+**Problem.** A commercial board-game title can't be safely modded for AI play (anti-tamper, delisted versions, no clean state reads). To let an AI seat play fairly, the game itself must be built so the engine — not the AI — owns the state.
+
+**Approach.** A standalone Godot 4 game with a deterministic rules engine: seeded RNG flows through one class, every action goes through an append-only event log (full replay), and AI seats (Neuro / Evil Neuro / human) submit **intents** that the engine validates and executes — the AI can never corrupt state. Original theme, no trademarked names.
+
+![Neuro Property Trade — engine tests and board demo](screenshots/neuro-engine.png)
+
+Live run: **161 headless tests green**, then an ASCII board snapshot (positions, cash, tiles per seat).
+
+**Stack:** Godot 4.7 (GDScript) · headless-testable core · Neuro SDK adapter (WS action protocol, action registry, per-turn context). Public: [github.com/kukhtik/neuro-property-trade](https://github.com/kukhtik/neuro-property-trade).
+
+---
+
 ## Stack
 
 | Area | Technologies |
 |---|---|
-| **Languages** | Python (primary), JavaScript / TypeScript, SQL, Java / Kotlin, Rust (basic) |
+| **Languages** | Python (primary), JavaScript / TypeScript, GDScript, SQL, Java / Kotlin, Rust (basic) |
 | **AI / LLM** | llama.cpp / GGUF, ONNX Runtime, LanceDB, embeddings + cross-encoder reranking, agent harnesses (Hermes Agent, Claude Code, Codex) |
+| **3D / Game** | Godot 4 (headless-testable deterministic engines), VRM 1.0 / glTF, trimesh, Blender toolchain |
 | **Backend** | FastAPI, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
 | **Interfaces** | PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
 | **Numerical** | NumPy / SciPy, Helmert / SVD, Levenberg–Marquardt, Nelder–Mead |

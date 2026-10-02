@@ -87,7 +87,7 @@
 
 **Проблема.** Геодезист рисует полевой абрис (набросок с нумерованными точками) и потом часами переносит его в CAD.
 
-**Подход.** Фото абриса → распознавание маркеров и текста → топографический DXF/DWG. **4 часа ручного черчения → 15 минут.** В продакшене у трёх геодезических компаний (Беларусь).
+**Подход.** Фото абриса → распознавание маркеров и текста → топографический DXF/DWG. **4 часа ручного черчения → 15 минут.** В продакшене у геодезических компаний (Беларусь).
 
 ![VETKA_DWG — аудит библиотеки блоков](screenshots/vetka-dwg-library.png)
 
@@ -118,12 +118,41 @@
 
 ---
 
+## VTuber Rigger — авто-риггинг: модель или скриншоты → VRM 1.0
+
+**Проблема.** Риггинг VTuber-аватара — скелет, скин-веса, выражения, spring-bones — занимает часы ручной работы в Blender, а реконструкция из плоского изображения (скриншоты) сложнее вдвойне.
+
+**Подход.** Два пути, полностью локально (без платных API): **Path A** — 3D-модель (GLB/GLTF/VRM/OBJ) → VRM 1.0; **Path B** — скриншоты спереди/сбоку/сзади → VRM 1.0. Сегментация тела на K-Means + кривизне, предиктор 53-костного VRM-скелета, скин-веса RBF + Laplacian, 17 выражений, spring-bones для волос/одежды, QA-гейты headless-VRM и LPIPS/CLIP.
+
+![VTuber Rigger — прогон пайплайна](screenshots/rigger-pipeline.png)
+
+Референсный прогон на тестовой меш-модели: `GLB → VRM`, exit 0, **54 узла, 1 меш, расширения `VRMC_vrm` + `VRMC_springBone`**.
+
+**Стек:** Python · trimesh · pygltflib · numpy / scipy / scikit-learn · OpenCV · pytest (unit + integration + property + perceptual). Публичный: [github.com/kukhtik/RIGGER](https://github.com/kukhtik/RIGGER).
+
+---
+
+## Neuro Property Trade — детерминированный игровой движок + AI-места
+
+**Проблема.** Коммерческую настольную игру нельзя безопасно модифицировать для игры ИИ (анти-тампер, снятые с продажи версии, нет чистого доступа к состоянию). Чтобы ИИ-место играло честно, сама игра должна быть построена так, чтобы состоянием владел движок — а не ИИ.
+
+**Подход.** Самостоятельная игра на Godot 4 с детерминированным движком правил: seeded RNG течёт через один класс, каждое действие идёт через append-only лог событий (полный replay), а ИИ-места (Neuro / Evil Neuro / человек) отправляют **интенты** — движок их валидирует и исполняет; ИИ не может испортить состояние. Оригинальный сеттинг, без чужих торговых марок.
+
+![Neuro Property Trade — тесты движка и демо доски](screenshots/neuro-engine.png)
+
+Живой прогон: **161 headless-тест зелёный**, затем ASCII-снимок доски (позиции, кэш, клетки по местам).
+
+**Стек:** Godot 4.7 (GDScript) · headless-тестируемое ядро · адаптер Neuro SDK (WS протокол действий, реестр действий, контекст хода). Публичный: [github.com/kukhtik/neuro-property-trade](https://github.com/kukhtik/neuro-property-trade).
+
+---
+
 ## Стек
 
 | Область | Технологии |
 |---|---|
-| **Языки** | Python (основной), JavaScript / TypeScript, SQL, Java / Kotlin, Rust (базово) |
+| **Языки** | Python (основной), JavaScript / TypeScript, GDScript, SQL, Java / Kotlin, Rust (базово) |
 | **AI / LLM** | llama.cpp / GGUF, ONNX Runtime, LanceDB, эмбеддинги + cross-encoder реранкинг, агентные контуры (Hermes Agent, Claude Code, Codex) |
+| **3D / игры** | Godot 4 (headless-тестируемые детерминированные движки), VRM 1.0 / glTF, trimesh, Blender-тулчейн |
 | **Backend** | FastAPI, Cloudflare Workers, D1, R2, SQLite / PostgreSQL, Kafka / gRPC |
 | **Интерфейсы** | PySide6 / PyQt6 / QML, Telegram Mini Apps, Compose (Android) |
 | **Численные методы** | NumPy / SciPy, Helmert / SVD, Левенберг–Марквардт, Нелдер–Мид |
