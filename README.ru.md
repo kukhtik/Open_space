@@ -231,7 +231,7 @@
 
 <div align="center">
 
-**[github.com/kukhtik](https://github.com/kukhtik)** · [linkedin.com/in/max-kukhto-294682165](https://www.linkedin.com/in/max-kukhto-294682165/) · maxkukhto@gmail.com · Могилёв, Беларусь (удалённо)
+**[github.com/kukhtik](https://github.com/kukhtik)** · [linkedin.com/in/max-kukhto-517091337](https://www.linkedin.com/in/max-kukhto-517091337/) · maxkukhto@gmail.com · Могилёв, Беларусь (удалённо)
 
 <sub>Интерфейсные скриншоты — с рабочих сборок; данные, идентифицирующие заказчика (названия объектов, локальные системы координат, номера зон, каталоги координат), замаскированы. В чате EC и кадрах BeerLog — демо-контент. Каждая метрика — из измеренного прогона.</sub>
 

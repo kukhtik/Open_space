@@ -231,7 +231,7 @@ Reference run: **63 sources compile with plain `javac` (0 errors)** and the buil
 
 <div align="center">
 
-**[github.com/kukhtik](https://github.com/kukhtik)** · [linkedin.com/in/max-kukhto-294682165](https://www.linkedin.com/in/max-kukhto-294682165/) · maxkukhto@gmail.com · Mogilev, Belarus (remote)
+**[github.com/kukhtik](https://github.com/kukhtik)** · [linkedin.com/in/max-kukhto-517091337](https://www.linkedin.com/in/max-kukhto-517091337/) · maxkukhto@gmail.com · Mogilev, Belarus (remote)
 
 <sub>Interface screenshots are captured from working builds; client-identifying data (site names, local coordinate systems, zone numbers, coordinate catalogs) is masked. The EC chat and BeerLog shots show demo content. Every metric is from a measured run.</sub>
 
