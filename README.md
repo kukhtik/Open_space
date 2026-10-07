@@ -214,6 +214,41 @@ Reference run: **63 sources compile with plain `javac` (0 errors)** and the buil
 
 ---
 
+## Streaming stateful prediction — a research problem
+
+**Problem.** A model must predict one row at a time in a stream: every row depends on the full prior history, the window is tens of thousands of rows long, and the metric is block-wise correlation *inside* each sequence — not MSE. Standard recipes (window slicing, MSE loss) don't work here.
+
+**Approach.** A stateful recurrent model (GRU, step-by-step ONNX export) with a strict state contract: single-row inference, hidden state carried between calls. The key is a **metric-aligned loss** — the official block-wise aggregate reimplemented in torch and verified against the scorer, with correlation accumulated over the whole sequence (not a short window where the target is near-constant and the signal drowns).
+
+Engineering levers, verified in practice:
+
+| Lever | Result |
+|---|---|
+| Metric-aligned loss | a single model beat our best ensemble |
+| Correlation horizon | full-window signal is 4–5× stronger than on a short segment |
+| Feature transform inside the ONNX graph | naive recomputation blew the inference limit; in-graph fits with 1.38× headroom |
+| Re-deriving the documented order-book layout | the documented bid/ask layout was false — found by brute-forcing pairs over 500k rows |
+
+A separate layer was **infrastructure resilience**: training ran on a 4 GB GPU under WSL, which silently restarted under load (page-cache leak through the 9p bridge). The fix — `posix_fadvise(DONTNEED)` on every parquet row group — stabilised the cache.
+
+*Competition task: the approach and engineering lessons are described; the data, metrics and code are not published (platform rules).*
+
+---
+
+## Neuro Property Trade — deterministic engine + custom UI
+
+**Problem.** A board game can't be safely modded for AI play: anti-tamper, no clean state reads. For an AI seat to play fairly, the engine must own the state.
+
+**Approach.** The engine owns the state and AI seats submit **intents**: seeded RNG through one class, every action goes through an append-only event log (full replay), so an AI can't corrupt state. A custom Godot 4 interface — a parametric board (no 40 hardcoded tiles), live relayout to the window size, RU/EN, light/dark theme, a seats panel and an event journal.
+
+![Neuro Property Trade — in-game UI](screenshots/neuro-ui.png)
+
+A match at the table: parametric board, dice, event journal, seats panel.
+
+**Stack:** Godot 4 (GDScript) · headless-testable core · Neuro SDK adapter (WS action protocol, action registry, per-turn context). Public: [github.com/kukhtik/neuro-property-trade](https://github.com/kukhtik/neuro-property-trade).
+
+---
+
 ## Stack
 
 | Area | Technologies |
