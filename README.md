@@ -132,15 +132,18 @@ Reference run on a test mesh: `GLB → VRM`, exit 0, **54 nodes, 1 mesh, extensi
 
 ---
 
-## Neuro Property Trade — deterministic board-game engine + AI seats
+## Neuro Property Trade — deterministic board-game engine + custom UI
 
 **Problem.** A commercial board-game title can't be safely modded for AI play (anti-tamper, delisted versions, no clean state reads). To let an AI seat play fairly, the game itself must be built so the engine — not the AI — owns the state.
 
-**Approach.** A standalone Godot 4 game with a deterministic rules engine: seeded RNG flows through one class, every action goes through an append-only event log (full replay), and AI seats (Neuro / Evil Neuro / human) submit **intents** that the engine validates and executes — the AI can never corrupt state. Original theme, no trademarked names.
+**Approach.** A standalone Godot 4 game with a deterministic rules engine: seeded RNG flows through one class, every action goes through an append-only event log (full replay), and AI seats (Neuro / Evil Neuro / human) submit **intents** that the engine validates and executes — the AI can never corrupt state. Original theme, no trademarked names. The UI is parametric (no 40 hardcoded tiles): it relayouts live to the window size, RU/EN, light/dark theme, seats panel and event journal.
 
-![Neuro Property Trade — engine tests and board demo](screenshots/neuro-engine.png)
-
-Live run: **161 headless tests green**, then an ASCII board snapshot (positions, cash, tiles per seat).
+<table>
+<tr>
+<td width="62%"><img src="screenshots/neuro-ui.png" alt="In-game UI"><br><sub>Match at the table — parametric board, dice, journal, seats</sub></td>
+<td><img src="screenshots/neuro-engine.png" alt="Engine tests"><br><sub>Headless engine run — <b>161 tests green</b>, then an ASCII board snapshot</sub></td>
+</tr>
+</table>
 
 **Stack:** Godot 4.7 (GDScript) · headless-testable core · Neuro SDK adapter (WS action protocol, action registry, per-turn context). Public: [github.com/kukhtik/neuro-property-trade](https://github.com/kukhtik/neuro-property-trade).
 
@@ -232,20 +235,6 @@ Engineering levers, verified in practice:
 A separate layer was **infrastructure resilience**: training ran on a 4 GB GPU under WSL, which silently restarted under load (page-cache leak through the 9p bridge). The fix — `posix_fadvise(DONTNEED)` on every parquet row group — stabilised the cache.
 
 *Competition task: the approach and engineering lessons are described; the data, metrics and code are not published (platform rules).*
-
----
-
-## Neuro Property Trade — deterministic engine + custom UI
-
-**Problem.** A board game can't be safely modded for AI play: anti-tamper, no clean state reads. For an AI seat to play fairly, the engine must own the state.
-
-**Approach.** The engine owns the state and AI seats submit **intents**: seeded RNG through one class, every action goes through an append-only event log (full replay), so an AI can't corrupt state. A custom Godot 4 interface — a parametric board (no 40 hardcoded tiles), live relayout to the window size, RU/EN, light/dark theme, a seats panel and an event journal.
-
-![Neuro Property Trade — in-game UI](screenshots/neuro-ui.png)
-
-A match at the table: parametric board, dice, event journal, seats panel.
-
-**Stack:** Godot 4 (GDScript) · headless-testable core · Neuro SDK adapter (WS action protocol, action registry, per-turn context). Public: [github.com/kukhtik/neuro-property-trade](https://github.com/kukhtik/neuro-property-trade).
 
 ---
 
