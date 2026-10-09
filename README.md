@@ -238,6 +238,40 @@ A separate layer was **infrastructure resilience**: training ran on a 4 GB GPU u
 
 ---
 
+## Static websites — hand-built, no libraries
+
+**Problem.** A business-card site on a website builder carries hundreds of KB of engine and gives no control over typography or responsive behaviour. But "hand-coded" too often means either a framework or a pile of hacks.
+
+**Approach.** Two sites built by hand — HTML, CSS, a little SVG and JS, **zero frameworks and zero third-party libraries**. They use two different visual languages on purpose, to show range rather than one trick twice: "Sokratilin" — an engineering-drawing concept (graph paper, a side register, a sticky case strip); "Slava Shved" — 6 pages of poster typography, torn edges, a masonry gallery and filters.
+
+<table>
+<tr>
+<td width="50%"><img src="screenshots/site-sokratilin.png" alt="Sokratilin"><br><sub>"Sokratilin" — the engineering-drawing concept</sub></td>
+<td width="50%"><img src="screenshots/site-shved.png" alt="Slava Shved"><br><sub>"Slava Shved" — poster typography, 6 pages</sub></td>
+</tr>
+<tr>
+<td colspan="2"><img src="screenshots/site-mobile.png" alt="Mobile"><br><sub>Mobile layout — 390 px, no horizontal scroll</sub></td>
+</tr>
+</table>
+
+**Verified by measurement, not by eye** (headless Chrome, DevTools protocol): horizontal scroll **0 px**, broken images **0**, JS errors **0**, computed styles actually applied — at desktop 1440 and mobile 390, across 8 and 16 combinations.
+
+| Metric | Sokratilin | Shved (6 pages) |
+|---|---|---|
+| Third-party libraries | **0** | **0** |
+| Images | **0** (all visuals in CSS and SVG) | 16 (proportion placeholders) |
+| Horizontal scroll | **0 px** | **0 px** |
+
+**Defects found and fixed** — real ones, not hypothetical: two stray `}` in the CSS (the browser silently stopped parsing, `:root` never reached the page, the font fell back to Times New Roman — invisible to the eye, caught only by measuring how many rules reached the parser); `overflow-x: clip` on `body` broke `position: sticky`; a font declared under the wrong name; and the chosen font had no Cyrillic at all — verified by reading its `cmap` table.
+
+A separate layer — a **Tilda port**: the same site packaged so the client edits content themselves, without a developer (markup → six T123 blocks, one path scheme that works across Tilda, GitHub Pages and local viewing).
+
+**Live showcase:** [kukhtik.github.io/site-concepts](https://kukhtik.github.io/site-concepts/)
+
+**Stack:** plain HTML5 · CSS3 (grid, `clamp`, `aspect-ratio`, sticky, `IntersectionObserver`) · inline SVG · library-free JavaScript · a small Python page generator. Public: [github.com/kukhtik/site-concepts](https://github.com/kukhtik/site-concepts).
+
+---
+
 ## Stack
 
 | Area | Technologies |
