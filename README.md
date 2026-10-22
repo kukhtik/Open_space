@@ -149,6 +149,36 @@ Reference run on a test mesh: `GLB → VRM`, exit 0, **54 nodes, 1 mesh, extensi
 
 ---
 
+## Razgon Quiz — live quiz-show platform (hall, remote, builder)
+
+**Problem.** A quiz night is a live show: a projector in the hall, a host steering from a phone, teams answering, and a scoreboard that must be right in front of a paying audience. Off-the-shelf quiz apps assume every player has a stable connection and that the host can fix the score by hand — neither survives a real venue with bad Wi-Fi.
+
+**Approach.** A single server owns the state and the score. The hall screen opens by a tokenised link (a plain game URL cannot control the show), one click unlocks the browser's `AudioContext`, and the host pages through questions with a keypress while each question's "fuse" timer runs itself. Because the hall answers **on paper** and only the host types, the server never has to hold hundreds of player sockets — the venue keeps working on a poor connection. The front end is a **PWA with explicit precache (386 entries)**; every one of the 98 mp3 cues is cached by name, because a missed track is silence without an error.
+
+<table>
+<tr>
+<td colspan="2"><img src="screenshots/razgon-hall.png" alt="Hall question with timer and live statistics"><br><sub>Hall — question with a 30-second fuse timer and live answer/accuracy stats</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshots/razgon-scoreboard.png" alt="Scoreboard after a round"><br><sub>Scoreboard — the server scores it; places, round points, game points</sub></td>
+<td width="50%"><img src="screenshots/razgon-pult.png" alt="Host remote on a phone"><br><sub>Host remote — controls the show from a phone</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="screenshots/razgon-player.png" alt="Player answering from a phone"><br><sub>Player — joins by game code, answers, sees points</sub></td>
+<td width="50%"><img src="screenshots/razgon-builder.png" alt="Quiz builder"><br><sub>Builder — rounds, questions, per-question music and timing</sub></td>
+</tr>
+</table>
+
+**Scope.** 123 API routes · 14 SQL migrations with CHECK constraints · **320 backend tests**, **161 frontend tests**, **89 hard e2e specs** (all green) · RBAC (owner / admin / city manager / host / DJ) · CRM for players and teams · online game from a phone.
+
+**Checks that refuse to pass vacuously.** `fresh-install-check.sh` searches migrations **recursively** and *fails* when it finds none — an empty checklist means "nothing to check", not "all good". `check-stand-fresh.sh` compares commit time with stand timestamps so e2e never runs against a stale build. Stand migrations are idempotent (tracked in `stand_migrations`): a re-run yields 0 statements and 0 errors.
+
+**Stack:** Node 20+ · Fastify 5 · Prisma 6 · PostgreSQL 17 · WebSocket relay · TypeScript 5 · Vite 6 · PWA (offline-first) · Playwright (system Chrome, `--workers=1`) · Docker Compose. *(Repository is private; architecture and measured results are documented here.)*
+
+![Razgon Quiz — public site](screenshots/razgon-home.png)
+
+---
+
 ## Hermes Viz — telemetry console for an agent farm
 
 **Problem.** A multi-agent farm (21 agents, 9 models, async task board) is opaque at a glance: which agent is doing what, where a task is stuck, what the knowledge base actually serves.
